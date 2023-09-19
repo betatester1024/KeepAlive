@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html class="{{mainClass}}">
+  <head>
+    <script src='//unstable.betatester1024.repl.co/utils.js'></script>
+    <title>BetterSelect | BetaOS Systems</title>
+    <script>
+      let currDat = [];
+      let lastUpdate = Date.now();
+      function onLoad() 
+      {
+        updatePings();
+        setInterval(refreshTimes, 500);
+      }
+
+      function updatePings() 
+      {
+        send(JSON.stringify({action:"getStatus"}), (res)=>{
+          currDat = res.data; 
+        });
+        send(JSON.stringify({action:"60000ms"}), (res)=>{
+          console.log(res.data-Date.now()); 
+        });
+      }
+
+      function refreshTimes() 
+      {
+        let statusTab = byId("statusTab");
+        statusTab.innerHTML = "";
+        for (let i=0; i<currDat.length; i++) 
+        {
+          let stat = currDat[i].status;
+          // console.log(stat.nextPing-Date.now());
+          if (stat.nextPing>0 && stat.nextPing < Date.now() 
+              && Date.now() - lastUpdate > 5000) { // make sure it has been 5sec since last refresh
+            updatePings();
+            lastUpdate = Date.now()
+            // return;
+          }
+          // console.log(stat.nextPing>Date.now());
+          // let row = document.createElement("tr");
+          // statusTab.appendChild(row);
+          let greyIt = isNaN(Number(stat.status));
+          let ele1 = document.createElement("div");
+          ele1.className = (greyIt?"gry":"blu") + " fsmed nohover round"
+          ele1.innerHTML = currDat[i].name;
+          let ele2 = document.createElement("div"); 
+          ele2.className = "right";
+          // console.log(stat.nextPing-Date.now());
+          ele2.innerHTML = `
+          <b style="display:block; width:unset" class="round fsmed ${stat.status==200?"grn":(greyIt?"gry":"red")}">${stat.status}</b>
+          <kbd class="${stat.lastTime>1000?"red":(greyIt?"gry":"blu")}">
+          Last response time:${stat.lastTime<0?"-":stat.lastTime}</kbd>
+          <kbd class="${greyIt?"gry":"blu"}">Pinging ${stat.nextPing<Date.now()&&stat.nextPing>0?"now":"in:"} 
+          ${stat.nextPing<0?"-":(stat.nextPing<Date.now()?"":toTime(stat.nextPing-Date.now()))}</kbd>
+          `;
+          statusTab.appendChild(ele1);
+          statusTab.appendChild(ele2);
+        }
+      }
+    </script>
+    <link rel="icon" type="image/x-icon" href="//betatester1024.repl.co/favicon.ico">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@100;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="//unstable.betatester1024.repl.co/globalformat.css">
+    <style>
+      kbd.red {
+        background-color: var(--system-bg);
+      }
+      .round 
+      {
+        border-radius: 10px;
+      }
+      #statusTab {
+        margin: 0px auto;
+        display: grid;
+        width: 90%;
+        overflow-x: auto;
+        column-gap: 8px;
+        row-gap: 8px;
+        grid-template-columns: auto auto;
+      }
+      #statusTab > div > b {
+        margin-bottom: 3px;
+      }
+      #statusTab > div > kbd{
+        display: inline-block;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        padding-left: 0px;
+        padding-right: 0px;
+        width: 100%;
+      }
+      #statusTab > div.right {
+        width: 200px;
+        padding: 8px;
+      }
+      #statusTab >div:not(.right) {
+        margin-left: 10px;
+      }
+      /* td {
+        display: inline-block;
+        margin-left: 10px;
+        margin-right: 10px;
+      } */
+    </style>
+  </head>
+  <body onload = "globalOnload(onLoad)">
+    <div class="main_content">
+      <header>
+        <h2>KeepAlive</h2>
+        <hr class="rounded">
+      </header>
+      <div id="statusTab">
+      </div>
+    </div>
+  </body>
+</html>
