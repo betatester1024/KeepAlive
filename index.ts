@@ -49,6 +49,7 @@ app.post('/server', async (req:any, res:any) => {
       break;
     case 'getStatus':
       // console.log(getStatus());
+      // res.end(JSON.stringify({status:"ERROR", data:{error:"KeepAlive"}, token:null}));
       res.end(JSON.stringify({status:"SUCCESS", data:await getStatus(), token:null}));
       break;
     default:

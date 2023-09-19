@@ -15,10 +15,9 @@
       function updatePings() 
       {
         send(JSON.stringify({action:"getStatus"}), (res)=>{
-          currDat = res.data; 
-        });
-        send(JSON.stringify({action:"60000ms"}), (res)=>{
-          console.log(res.data-Date.now()); 
+          if (res.status == "SUCCESS") currDat = res.data; 
+          else currDat = [{name:"Error: Request failed ("+res.data.error+")", 
+                           status: {status:"ERR", nextPing:-1, lastTime:-1}}];
         });
       }
 
@@ -26,6 +25,10 @@
       {
         let statusTab = byId("statusTab");
         statusTab.innerHTML = "";
+        let totalOnline = 0;
+        let totalOffline = 0;
+        let totalResponseOK = 0;
+        let totalTimeOK = 0;
         for (let i=0; i<currDat.length; i++) 
         {
           let stat = currDat[i].status;
@@ -36,10 +39,17 @@
             lastUpdate = Date.now()
             // return;
           }
+          if (stat.status=="Offline") totalOffline++;
+          else {
+            totalOnline++;
+            if (stat.lastReponseTime<=500) totalTimeOK++;
+            if (stat.status == 200) totalResponseOK++;
+          }
+          
           // console.log(stat.nextPing>Date.now());
           // let row = document.createElement("tr");
           // statusTab.appendChild(row);
-          let greyIt = isNaN(Number(stat.status));
+          let greyIt = isNaN(Number(stat.status)) && stat.status != "ERR";
           let ele1 = document.createElement("div");
           ele1.className = (greyIt?"gry":"blu") + " fsmed nohover round"
           ele1.innerHTML = currDat[i].name;
@@ -48,7 +58,7 @@
           // console.log(stat.nextPing-Date.now());
           ele2.innerHTML = `
           <b style="display:block; width:unset" class="round fsmed ${stat.status==200?"grn":(greyIt?"gry":"red")}">${stat.status}</b>
-          <kbd class="${stat.lastTime>1000?"red":(greyIt?"gry":"blu")}">
+          <kbd class="${stat.lastTime>500?"red":(greyIt?"gry":"blu")}">
           Last response time:${stat.lastTime<0?"-":stat.lastTime}</kbd>
           <kbd class="${greyIt?"gry":"blu"}">Pinging ${stat.nextPing<Date.now()&&stat.nextPing>0?"now":"in:"} 
           ${stat.nextPing<0?"-":(stat.nextPing<Date.now()?"":toTime(stat.nextPing-Date.now()))}</kbd>
@@ -56,6 +66,8 @@
           statusTab.appendChild(ele1);
           statusTab.appendChild(ele2);
         }
+        let summ = byId("summary");
+        
       }
     </script>
     <link rel="icon" type="image/x-icon" href="//betatester1024.repl.co/favicon.ico">
@@ -111,6 +123,7 @@
     <div class="main_content">
       <header>
         <h2>KeepAlive</h2>
+        <h2 class="fssml" id="summary"></h2>
         <hr class="rounded">
       </header>
       <div id="statusTab">
