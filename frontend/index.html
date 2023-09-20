@@ -2,7 +2,7 @@
 <html class="{{mainClass}}">
   <head>
     <script src='//unstable.betatester1024.repl.co/utils.js'></script>
-    <title>BetterSelect | BetaOS Systems</title>
+    <title>BetaOS KeepAlive</title>
     <script>
       let currDat = [];
       let lastUpdate = Date.now();
@@ -52,7 +52,7 @@
           let greyIt = isNaN(Number(stat.status)) && stat.status != "ERR";
           let ele1 = document.createElement("div");
           ele1.className = (greyIt?"gry":"blu") + " fsmed nohover round"
-          ele1.innerHTML = currDat[i].name;
+          ele1.innerHTML = `<a target="_blank" href="//${currDat[i].name}">${currDat[i].name}</a>`;
           let ele2 = document.createElement("div"); 
           ele2.className = "right";
           // console.log(stat.nextPing-Date.now());
@@ -116,6 +116,11 @@
       }
       #statusTab >div:not(.right) {
         margin-left: 10px;
+      }
+
+      div.gry > a 
+      {
+        color: var(--system-grey);
       }
       /* td {
         display: inline-block;

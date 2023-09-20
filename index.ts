@@ -17,6 +17,14 @@ app.get('/', (req:any, res:any) => {
   res.sendFile(frontendDir+'/index.html')
 })
 
+app.get('/callback', (req:any, res:any) => {
+  res.sendFile(frontendDir+'/callback.html')
+})
+
+app.get('/pagetwo', (req:any, res:any) => {
+  res.sendFile(frontendDir+'/pagetwo.html')
+})
+
 app.get("*/nodemodules/*", (req:any, res:any) => {
   // no long requests!
   if (req.url.length > 500) res.sendFile(frontendDir+"/404.html");
@@ -42,18 +50,18 @@ app.post('/server', async (req:any, res:any) => {
   switch(body.action) 
   {
     case 'keepAlive':
-      res.end(JSON.stringify({status:"SUCCESS", data:null, token:null}));
+      res.end(JSON.stringify({status:"SUCCESS", data:null}));
       break;
     case '60000ms':
-      res.end(JSON.stringify({status:"SUCCESS", data:Date.now()+60000, token:null}));
+      res.end(JSON.stringify({status:"SUCCESS", data:Date.now()+60000}));
       break;
     case 'getStatus':
       // console.log(getStatus());
       // res.end(JSON.stringify({status:"ERROR", data:{error:"KeepAlive"}, token:null}));
-      res.end(JSON.stringify({status:"SUCCESS", data:await getStatus(), token:null}));
+      res.end(JSON.stringify({status:"SUCCESS", data:await getStatus()}));
       break;
     default:
-      res.end(JSON.stringify({status:"ERROR", data:{error:"KeepAlive"}, token:null}));
+      res.end(JSON.stringify({status:"ERROR", data:{error:"KeepAlive"}}));
       break;
   }
 })
